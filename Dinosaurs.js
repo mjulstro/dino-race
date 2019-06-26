@@ -1,6 +1,7 @@
 // Dinosaurs
 class Dinosaur {
-  constructor(speed, fast, dc, carnivore, ac, hp, at, dmg, con) {
+  constructor(name, speed, fast, dc, carnivore, ac, hp, at, dmg, con) {
+    this.name = name;
     this.speed = speed;
     this.fast = fast;
     this.dc = dc;
@@ -13,19 +14,24 @@ class Dinosaur {
   }
   conSave() {
     var save = roll("1d20+"+this.con);
-    if (save > 10) {
+    console.log(this.name+" rolled "+save+" on their CON save.")
+    if (save < 10) {
       this.speed = this.speed / 2;
       this.fast = this.fast / 2;
+      console.log(this.name+"'s speed is now "+this.speed+"/"+this.fast+"!");
     }
   }
   attack(otherDino) {
     // TODO
   }
-  get dc() {return this.dc;}
 };
 class Allosaurus extends Dinosaur {
-  constructor() {
-    super(50, 80, 16, true, 13, 30, 6, "1d10+3", 2);
+  constructor(name) {
+    if (name == null) {
+      super("Allosaurus", 50, 80, 16, true, 13, 30, 6, "1d10+3", 2);
+    } else {
+      super(name, 50, 80, 16, true, 13, 30, 6, "1d10+3", 2);
+    }
   }
 }
 class Deinonychus extends Dinosaur {
@@ -61,28 +67,38 @@ class TRex extends Dinosaur {
 
 // basic constructor for someone riding a dino
 class Rider {
-  constructor(dino, skillMod) {
+  constructor(name, dino, skillMod) {
+    this.name = name;
     this.ah = "1d20+"+skillMod;
-    this.dinosaur = dino;
-    this.distance = 0;
+    this.dino = dino;
+    this.dist = 0;
   }
   ride() {
-    if (roll(this.ah) >= this.dinosaur.dc()) {
-      this.distance += this.dinosaur[speed];
+    var ahCheck = roll(this.ah);
+    console.log(this.name + " rolled a(n) "+ahCheck+" on their Animal Handling check.");
+    
+    if (ahCheck >= this.dino.dc) {
+      this.dist += this.dino.speed;
+      console.log(this.dino.name+" moves forward "+this.dino.speed+" feet!");
     }
-    console.log(this.distance)
+    console.log(this.dino.name+" is "+this.dist+" feet into the race.");
   }
   thrash() {
+    console.log(this.name+" is thrashing "+this.dino.name+" furiously!");
+    
     // animal handling check is made with advantage
-    var result = Math.max(roll(this.ah), roll(this.ah));
+    var roll1 = roll(this.ah), roll2 = roll(this.ah);
+    console.log(this.name+" rolled "+roll1+" and "+roll2+" on their Animal Handling check.");
+    var result = Math.max(roll1, roll2);
     
     // if successful, move forward faster
-    if (result >= this.dinosaur[dc]) {
-      this.distance += this.dinosaur[fast];
+    if (result >= this.dino.dc) {
+      this.dist += this.dino.fast;
     }
-    console.log(this.distance)
+    console.log(this.dino.name+" moves forward "+this.dino.fast+" feet!")
+    console.log(this.dino.name+" is "+this.dist+" feet into the race.");
     // but the dino has to make a con save or it gets slower
-    this.dinosaur.conSave();
+    this.dino.conSave();
   }
 };
 
@@ -123,5 +139,10 @@ function roll(str) {
 
 
 //test
-rider = new Rider(new Allosaurus(),6);
-rider.ride();
+joe = new Rider("Joe", new Allosaurus("Spronky"), 4);
+try {
+  joe.ride();
+  joe.thrash();
+} catch(e) {
+  console.log(e.stack)
+}
